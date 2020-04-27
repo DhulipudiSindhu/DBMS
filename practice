@@ -1,0 +1,68 @@
+dhulipudi-sindhu:~/environment $ sqlite3 db.sqlite3
+SQLite version 3.24.0 2018-06-04 19:24:41
+dhulipudi-sindhu:~/environment $ sqlite3 db.sqlite3
+SQLite version 3.24.0 2018-06-04 19:24:41
+Enter ".help" for usage hints.
+sqlite> .tables
+user
+sqlite> CREATE TABLE age(id INT);                                                                                                
+sqlite> .tables
+age   user
+sqlite> CREATE TABLE Student (ID INT PRIMARY KEY NOT NULL, NAME VARCHAR(250), AGE INT,SCORE INT);
+sqlite> .tables
+Student  age      user   
+sqlite> .schema  user                                                                                                            
+CREATE TABLE user(id INT);
+sqlite> .schema Student
+CREATE TABLE Student (ID INT PRIMARY KEY NOT NULL, NAME VARCHAR(250), AGE INT,SCORE INT);
+sqlite> INSERT INTO  Student(id, name, age, score) values(1, 'sindhu', 23, 100);                                                 
+sqlite> .schema Student
+CREATE TABLE Student (ID INT PRIMARY KEY NOT NULL, NAME VARCHAR(250), AGE INT,SCORE INT);
+sqlite> INSERT INTO  Student(ID, NAME,AGE,SCORE) values(1, 'siri', 20, 90);                                                      
+Error: UNIQUE constraint failed: Student.ID
+sqlite> SELECT * FROM Student;
+1|sindhu|23|100
+sqlite> INSERT INTO  Student(ID, NAME,AGE,SCORE) values(2, 'siri', 20, 90);                                                      
+sqlite> SELECT * FROM Student;
+1|sindhu|23|100
+2|siri|20|90
+sqlite> .headers on
+sqlite> SELECT * FROM Student;
+ID|NAME|AGE|SCORE
+1|sindhu|23|100
+2|siri|20|90
+sqlite> UPDATE Student SET name = "padmini";
+sqlite> SELECT * FROM Student;                                                                                                   
+ID|NAME|AGE|SCORE
+1|padmini|23|100
+2|padmini|20|90
+sqlite> UPDATE Student SET name = "padmini" WHERE id = 2;
+sqlite> SELECT * FROM Student;                                                                                                   
+ID|NAME|AGE|SCORE
+1|padmini|23|100
+2|padmini|20|90
+sqlite> UPDATE Student SET name = "siri" WHERE id = 2;                                                                           
+sqlite> SELECT * FROM Student;                                                                                                   
+ID|NAME|AGE|SCORE
+1|padmini|23|100
+2|siri|20|90
+sqlite> INSERT INTO Student(ID, NAME, AGE, SCORE) values(3, 'saru', 23, 100);
+sqlite> SELECT * FROM Student;                                                                                                   
+ID|NAME|AGE|SCORE
+1|padmini|23|100
+2|siri|20|90
+3|saru|23|100
+sqlite> DELETE FROM Student WHERE id =2;
+sqlite> SELECT * FROM Student;
+ID|NAME|AGE|SCORE
+1|padmini|23|100
+3|saru|23|100
+sqlite> .tables
+Student  age      user   
+sqlite> DROP TABLE age
+   ...> DROP TABLE age;
+Error: near "DROP": syntax error
+sqlite> DROP TABLE age;
+sqlite> .tables
+Student  user   
+sqlite> 
