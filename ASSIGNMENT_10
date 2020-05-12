@@ -160,7 +160,12 @@ Q1 = '''SELECT  p.player_id, mc.team_id, p.jersey_no, p.name, p.date_of_birth, p
          left JOIN GoalDetails gd on gd.player_id = mc.captain
          WHERE gd.goal_id is null
          ''';
-        
+Q1 = '''SELECT  p.player_id, mc.team_id, p.jersey_no, p.name, p.date_of_birth, p.age FROM Player as p
+         INNER JOIN MatchCaptain mc on mc.captain = p.player_id
+         left JOIN GoalDetails gd on gd.player_id = mc.captain
+         WHERE gd.goal_id is null
+         ''';
+                
 Q2 =  '''SELECT team_id,(select count(match_no) from MatchTeamDetails where mt.team_id = MatchTeamDetails.team_id) as no_of_games 
          from MatchTeamDetails as mt GROUP BY mt.team_id''';
          
