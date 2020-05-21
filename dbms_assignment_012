@@ -1,3 +1,4 @@
+
 class DoesNotExist(Exception):
     pass
 
@@ -52,16 +53,34 @@ class Student:
         write_data(q)
     
     def save(self):
+        import sqlite3
+        conn = sqlite3.connect("students.sqlite3")
+        crsr = conn.cursor()
+        crsr.execute("PRAGMA foreign_keys= on;")
         if self.student_id is None:
-            query = "INSERT INTO Student(name,age,score) VALUES ('{}', {},{})".format(self.name,self.age,self.score);
+            q = 'INSERT INTO Student(student_id,name,age,score) VALUES(Null,\'{}\', {},{})'.format(self.name,self.age,self.score);
+            crsr.execute(q) 
+            self.student_id = crsr.lastrowid
+        else:
+            q = "UPDATE student SET name = \'{}\' ,age = {}, score = {} where student_id ={}".format(self.name, self.age,self.score,self.student_id);
+            crsr.execute(q)     
+        conn.commit()
+        conn.close()
+    
+        
+        
+    '''
+    def save(self):
+        if self.student_id is None:
+            query = "INSERT INTO Student(name,age,score) VALUES (\'{}\', {},{})".format(self.name,self.age,self.score);
             write_data(query)
-            q = "SELECT student_id from student WHERE name = '{}', age = {}, score ={}".format(self.name,self.age,self.score);
+            q = "SELECT student_id from student WHERE name = \'{}\', age = {}, score ={}".format(self.name,self.age,self.score);
             out = read_data(q)
             self.student_id = out[0][0]
         else:
-            query = "UPDATE student SET name = '{}' ,age = {}, score = {} where student_id ={}".format(self.name, self.age, self.score,self.student_id);
+            query = "UPDATE student SET name = \'{}\' ,age = {}, score = {} where student_id ={}".format(self.name, self.age, self.score,self.student_id);
             write_data(query)
-       
+    '''   
        
 def write_data(sql_query):
 	import sqlite3
@@ -81,4 +100,3 @@ def read_data(sql_query):
 	ans= crsr.fetchall()  
 	connection.close() 
 	return ans
-	
