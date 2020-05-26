@@ -173,6 +173,9 @@ CREATE TABLE Student (
 );
 Learn defining custom exceptions in Python in this reference
 
+-------------
+ANSWER
+
 
 
 class DoesNotExist(Exception):
@@ -235,61 +238,108 @@ class Student:
         conn.commit()
         conn.close()
     
-
     @staticmethod
     def filter(**kwargs):
+        qy_lt = []
+        dictionary = {'lt': '<', 'lte': '<=', 'gt': '>', 'gte': '>=', 'neq' : '<>'}
+        fields = ['student_id', 'name', 'age', 'score']
+        for key, value in kwargs.items():
+            if "__" in key:
+                field,expr =  key.split("__")
+                if field not in fields:
+                    raise InvalidField
+                else:
+                    if expr == 'contains':
+                        q = '{} like "%{}%" '.format(field, value)
+                    elif expr == 'in':
+                        value = tuple(value)
+                        q = "{} in {}".format(field,value)
+                    elif expr in dictionary:
+                        if field != 'name':
+                            q = '{} {} {}'.format(field,dictionary[expr], value)
+                        else:
+                            q = '{} <> \'{}\' '.format(field, value)
+            else:
+                if key not in fields:
+                    raise InvalidField
+                else:
+                    if key != 'name':
+                        q = "{} = {}".format(key, value)
+                    else:
+                        q = '{} == \'{}\' '.format(key, value)
+                
+            
+            qy_lt.append(q)
+        query = " and ".join(qy_lt)
+
+        final_result =  'SELECT * FROM Student WHERE {}'.format(query)
+      
+        out = read_data(final_result)
+        
+        lt = []
+        for i in out:
+            ans = Student(i[1], i[2], i[3])
+            ans.student_id = i[0]
+            lt.append(ans)
+        return lt
+            
+    
+    '''
+    @staticmethod
+    def filter(**kwargs):
+        query_lt = []   
         for key,value in kwargs.items():
             keys = key
             value = value
-        
-        a = keys.split("__")
-        
-        if a[0] not in ('student_id', 'name', 'age', 'score'):
-            raise InvalidField
+            a = keys.split("__")
             
-        if keys in ('student_id', 'name','age', 'score'):
-            q = 'SELECT * FROM Student WHERE {} = \'{}\' '.format(keys, value)
-            out = read_data(q)
-        else:
-            #keys = keys.split("__")
-            if a[1] == 'lt':
-                q = 'SELECT * FROM Student WHERE {} < {}'.format(a[0],value);
+            if a[0] not in ('student_id', 'name', 'age', 'score'):
+                raise Invalstudent_idField
                 
-            if a[1] == 'lte':
-                q = 'SELECT * FROM Student WHERE {} <= {}'.format(a[0],value);
-                
-            if a[1] == 'gt':
-                q = 'SELECT * FROM Student WHERE {} > {}'.format(a[0],value);
-               
-            if a[1] == 'gte':
-                q = 'SELECT * FROM Student WHERE {} >= {}'.format(a[0],value);
-                
-            if a[1] == 'neq':
-                q = 'SELECT * FROM Student WHERE {} <> \'{}\''.format(a[0], value);
-               
-            if a[1] == 'in':
-                q = 'SELECT * FROM Student WHERE {} in {}'.format(a[0], tuple(value));
-                
-            if a[1] == 'contains':
-                q = 'SELECT * FROM Student WHERE {} LIKE "%{}%" '.format(a[0], value);
-                
-            out = read_data(q)
+            if keys in ('student_id', 'name','age', 'score'):
+                q = 'SELECT * FROM Student WHERE {} = \'{}\' '.format(keys, value)
+                out = read_data(q)
+            else:
+                if a[1] == 'lt':
+                    q = 'SELECT * FROM Student WHERE {} < {}'.format(a[0],value);
+                    
+                if a[1] == 'lte':
+                    q = 'SELECT * FROM Student WHERE {} <= {}'.format(a[0],value);
+                    
+                if a[1] == 'gt':
+                    q = 'SELECT * FROM Student WHERE {} > {}'.format(a[0],value);
+                   
+                if a[1] == 'gte':
+                    q = 'SELECT * FROM Student WHERE {} >= {}'.format(a[0],value);
+                    
+                if a[1] == 'neq':
+                    q = 'SELECT * FROM Student WHERE {} <> \'{}\''.format(a[0], value);
+                   
+                if a[1] == 'in':
+                    q = 'SELECT * FROM Student WHERE {} in {}'.format(a[0], tuple(value));
+                    
+                if a[1] == 'contains':
+                    q = 'SELECT * FROM Student WHERE {} LIKE "%{}%" '.format(a[0], value);
+                    
+                out = read_data(q)
+            query_lt.append(out)
         
-        if len(out) == 0:
-            return []
-        else:
-            lt = []
-            for i in out:
-                ans = Student(i[1], i[2], i[3])
-                ans.student_id = i[0]
-                lt.append(ans)
-            return lt
-        
-        
+            result = set.intersection(*[set(i) for i in query_lt])
+            final_result = sorted(result)
+          
+    
+        lt = []
+        for i in final_result:
+            ans = Student(i[1], i[2], i[3])
+            ans.student_id = i[0]
+            lt.append(ans)
+        return lt
+    '''   
         
 def write_data(sql_query):
 	import sqlite3
 	connection = sqlite3.connect("selected_students.sqlite3")
+	#connection = sqlite3.connect("dbms/dbms_resources/students_db.sqlite3")
 	crsr = connection.cursor() 
 	crsr.execute("PRAGMA foreign_keys=on;") 
 	crsr.execute(sql_query) 
@@ -300,8 +350,10 @@ def write_data(sql_query):
 def read_data(sql_query):
 	import sqlite3
 	connection = sqlite3.connect("selected_students.sqlite3")
+	#connection = sqlite3.connect("dbms/dbms_resources/students_db.sqlite3")
 	crsr = connection.cursor() 
 	crsr.execute(sql_query) 
 	ans= crsr.fetchall()  
 	connection.close() 
 	return ans
+
